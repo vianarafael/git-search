@@ -2,18 +2,26 @@
 import React, { useState, useEffect } from "react";
 import { Octokit } from "@octokit/core";
 
+import Repos from "./components/Repos";
+import Pagination from "./components/Pagination";
+
 import "./App.css";
 
 function App() {
   const [searchText, setSearchText] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
+  const [repos, setRepos] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [reposPerPage, setreposPerPage] = useState(5);
+
   useEffect(() => {
     const octokit = new Octokit({
       auth: "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",
       userAgent: "skylight v1",
     });
 
-    const httpReq = async () => {
+    const fetchRepos = async () => {
+      setLoading(true);
       let queryArray = searchText.split(" ");
       let queryString = "";
       queryArray.forEach((word) => (queryString += word + "+"));
@@ -23,17 +31,17 @@ function App() {
         `GET /search/repositories?q=${searchText}&sort=stars&order=desc`,
         {}
       );
-      setSearchResults(res.data.items);
-      console.log(res.data.items);
+      setRepos(res.data.items);
+      setLoading(false);
     };
 
-    if (searchText && !searchResults.length) {
-      httpReq();
+    if (searchText && !repos.length) {
+      fetchRepos();
     } else {
       let timeoutID = setTimeout(() => {
         // do not search if input is empty
         if (searchText) {
-          httpReq();
+          fetchRepos();
         }
       }, 500);
 
@@ -48,6 +56,14 @@ function App() {
     setSearchText(event.target.value);
   };
 
+  // Get current repos
+  const indexOfLastRepo = currentPage * reposPerPage;
+  const indexOfFirstRepo = indexOfLastRepo - reposPerPage;
+  const currentRepos = repos.slice(indexOfFirstRepo, indexOfLastRepo);
+
+  // Change Page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   return (
     <div className="App">
       <label>Search a repo on GitHub</label>
@@ -55,16 +71,12 @@ function App() {
       <input onChange={changeHandler} type="text" name="search" id="search" />
       <h1>{searchText}</h1>
       {/* <button onClick={httpReq}>Make the request</button> */}
-      {searchResults.map((item) => (
-        <div>
-          <a href={item.html_url}>
-            <h2>{item.name}</h2>
-            <h3>{item.description}</h3>
-          </a>
-          <p>{item.language}</p>
-          <p>Last update: {item.updated_at}</p>
-        </div>
-      ))}
+      <Repos repos={currentRepos} loading={loading} />
+      <Pagination
+        reposPerPage={reposPerPage}
+        totalRepos={repos.length}
+        paginate={paginate}
+      />
     </div>
   );
 }
