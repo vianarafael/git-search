@@ -1,5 +1,4 @@
-// @ts-nocheck
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, SetStateAction } from "react";
 import { Octokit } from "@octokit/core";
 
 import Repos from "./components/Repos";
@@ -7,7 +6,7 @@ import Pagination from "./components/Pagination";
 
 import "./App.css";
 
-function App() {
+const App = () => {
   const [searchText, setSearchText] = useState("");
   const [repos, setRepos] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -49,10 +48,11 @@ function App() {
         clearTimeout(timeoutID);
       };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchText]);
 
-  const changeHandler = (event) => {
+  const changeHandler = (event: {
+    target: { value: SetStateAction<string> };
+  }) => {
     setSearchText(event.target.value);
   };
 
@@ -62,15 +62,13 @@ function App() {
   const currentRepos = repos.slice(indexOfFirstRepo, indexOfLastRepo);
 
   // Change Page
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const paginate = (pageNumber: SetStateAction<number>) =>
+    setCurrentPage(pageNumber);
 
   return (
-    <div className="App">
-      <label>Search a repo on GitHub</label>
-      <br></br>
+    <div className="container mt-5">
+      <h1 className="text-primary mb-3">Search a repo on GitHub</h1>
       <input onChange={changeHandler} type="text" name="search" id="search" />
-      <h1>{searchText}</h1>
-      {/* <button onClick={httpReq}>Make the request</button> */}
       <Repos repos={currentRepos} loading={loading} />
       <Pagination
         reposPerPage={reposPerPage}
@@ -79,6 +77,6 @@ function App() {
       />
     </div>
   );
-}
+};
 
 export default App;

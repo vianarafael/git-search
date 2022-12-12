@@ -1,8 +1,14 @@
-// @ts-nocheck
+interface IPaginationProps {
+  reposPerPage: number;
+  totalRepos: number;
+  paginate: (number: number) => void;
+}
 
-import React from "react";
-
-export default function Pagination({ reposPerPage, totalRepos, paginate }) {
+const Pagination = ({
+  reposPerPage,
+  totalRepos,
+  paginate,
+}: IPaginationProps) => {
   const pageNumbers = [];
 
   for (let i = 1; i <= Math.ceil(totalRepos / reposPerPage); i++) {
@@ -10,10 +16,10 @@ export default function Pagination({ reposPerPage, totalRepos, paginate }) {
   }
   return (
     <nav>
-      <ul>
+      <ul className="pagination">
         {pageNumbers.map((number) => (
-          <li key={number}>
-            <a onClick={() => paginate(number)} href="!#">
+          <li key={number} className="page-item">
+            <a onClick={() => paginate(number)} href="!#" className="page-link">
               {number}
             </a>
           </li>
@@ -21,4 +27,6 @@ export default function Pagination({ reposPerPage, totalRepos, paginate }) {
       </ul>
     </nav>
   );
-}
+};
+
+export default Pagination;
